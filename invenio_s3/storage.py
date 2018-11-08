@@ -14,7 +14,7 @@ from flask import current_app
 from invenio_files_rest.errors import StorageError
 from invenio_files_rest.storage import PyFSFileStorage, pyfs_storage_factory
 
-from .config import SEND_FILE_DIRECTLY
+from .config import S3_SEND_FILE_DIRECTLY
 from .helpers import redirect_stream
 
 
@@ -115,7 +115,7 @@ class S3FSFileStorage(PyFSFileStorage):
                   trusted=False, chunk_size=None, as_attachment=False):
         """Send the file to the client."""
 
-        if SEND_FILE_DIRECTLY:
+        if S3_SEND_FILE_DIRECTLY:
             return super(S3FSFileStorage, self).send_file(filename,
                                                           mimetype=mimetype,
                                                           restricted=restricted,
