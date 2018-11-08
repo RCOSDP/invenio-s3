@@ -38,3 +38,5 @@ See `Configuring Credentials
 <https://boto3.readthedocs.io/en/latest/guide/configuration.html#credentials>`_.
 for more information.
 """
+
+SEND_FILE_DIRECTLY = True

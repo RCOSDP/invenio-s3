@@ -12,8 +12,10 @@ from io import BytesIO
 import s3fs
 from flask import current_app
 from invenio_files_rest.errors import StorageError
+from invenio_files_rest.helpers import send_stream
 from invenio_files_rest.storage import PyFSFileStorage, pyfs_storage_factory
 
+from .config import SEND_FILE_DIRECTLY
 from .helpers import redirect_stream
 
 
@@ -110,14 +112,54 @@ class S3FSFileStorage(PyFSFileStorage):
 
         return bytes_written, checksum
 
-    # def send_file(self,
-    #               filename,
-    #               mimetype=None,
-    #               restricted=True,
-    #               checksum=None,
-    #               trusted=False,
-    #               chunk_size=None,
-    #               as_attachment=False):
+    def send_file(self, filename, mimetype=None, restricted=True, checksum=None,
+                  trusted=False, chunk_size=None, as_attachment=False):
+        """Send the file to the client."""
+
+        if SEND_FILE_DIRECTLY:
+            return super(S3FSFileStorage, self).send_file(filename,
+                                                          mimetype=mimetype,
+                                                          restricted=restricted,
+                                                          checksum=checksum,
+                                                          trusted=trusted,
+                                                          chunk_size=chunk_size,
+                                                          as_attachment=as_attachment)
+        try:
+            fs, path = self._get_fs()
+            url = fs.url(path, expires=60)
+
+            md5_checksum = None
+            if checksum:
+                algo, value = checksum.split(':')
+                if algo == 'md5':
+                    md5_checksum = value
+
+            return redirect_stream(
+                url,
+                filename,
+                self._size,
+                self._modified,
+                mimetype=mimetype,
+                restricted=restricted,
+                etag=checksum,
+                content_md5=md5_checksum,
+                chunk_size=chunk_size,
+                trusted=trusted,
+                as_attachment=as_attachment,
+            )
+        except Exception as e:
+            raise StorageError('Could not send file: {}'.format(e))
+
+
+    # def send_file(self, filename, mimetype=None, restricted=True, checksum=None,
+    #               trusted=False, chunk_size=None, as_attachment=False):
+    #
+    #     if SEND_FILE_DIRECTLY:
+    #
+    #
+    # def send_file_by_redirect(self, filename, mimetype=None, restricted=True,
+    #                           checksum=None, trusted=False, chunk_size=None,
+    #                           as_attachment=False):
     #     """Send the file to the client."""
     #     try:
     #         fs, path = self._get_fs()
@@ -143,6 +185,40 @@ class S3FSFileStorage(PyFSFileStorage):
     #             as_attachment=as_attachment,
     #         )
     #     except Exception as e:
+    #         raise StorageError('Could not send file: {}'.format(e))
+    #
+    # def send_file_directly(self, filename, mimetype=None, restricted=True,
+    #                        checksum=None, trusted=False, chunk_size=None,
+    #                        as_attachment=False):
+    #     """Send the file to the client."""
+    #     try:
+    #         fp = self.open(mode='rb')
+    #     except Exception as e:
+    #         raise StorageError('Could not send file: {}'.format(e))
+    #
+    #     try:
+    #         md5_checksum = None
+    #         if checksum:
+    #             algo, value = checksum.split(':')
+    #             if algo == 'md5':
+    #                 md5_checksum = value
+    #
+    #         # Send stream is responsible for closing the file.
+    #         return send_stream(
+    #             fp,
+    #             filename,
+    #             self._size,
+    #             self._modified,
+    #             mimetype=mimetype,
+    #             restricted=restricted,
+    #             etag=checksum,
+    #             content_md5=md5_checksum,
+    #             chunk_size=chunk_size,
+    #             trusted=trusted,
+    #             as_attachment=as_attachment,
+    #         )
+    #     except Exception as e:
+    #         fp.close()
     #         raise StorageError('Could not send file: {}'.format(e))
 
     def copy(self, src, *args, **kwargs):
