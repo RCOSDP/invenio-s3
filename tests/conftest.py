@@ -23,9 +23,9 @@ from invenio_s3 import InvenioS3, S3FSFileStorage
 def app_config(app_config):
     """Customize application configuration."""
     app_config['FILES_REST_STORAGE_FACTORY'] = 'invenio_s3:s3_storage_factory'
-    app_config['S3_ENDPOINT_URL'] = 'http://s3-ap-northeast-1.amazonaws.com/weko.pyfilesystem/'
-    app_config['S3_ACCCESS_KEY_ID'] = 'AKIAIYDNDMIMWBNE4LSQ'
-    app_config['S3_SECRECT_ACCESS_KEY'] = 'hbEyqoOkhgWMllpEwf5hIBOeiOg9wlPBQPcuYwNK'
+    app_config['S3_ENDPOINT_URL'] = ''
+    app_config['S3_ACCCESS_KEY_ID'] = ''
+    app_config['S3_SECRECT_ACCESS_KEY'] = ''
     return app_config
 
 
