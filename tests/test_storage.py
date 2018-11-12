@@ -324,6 +324,8 @@ def test_send_file(base_app, s3fs):
     data = b'sendthis'
     uri, size, checksum = s3fs.save(BytesIO(data))
 
+    print(checksum)
+
     with base_app.test_request_context():
         res = s3fs.send_file(
             'test.txt', mimetype='text/plain', checksum=checksum)
