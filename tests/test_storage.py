@@ -24,7 +24,7 @@ from invenio_files_rest.storage import PyFSFileStorage
 from mock import patch
 from s3fs import S3File, S3FileSystem
 
-from invenio_s3 import S3FSFileStorage, s3fs_storage_factory
+from invenio_s3 import S3FSFileStorage, s3fs_storage_factory, config
 
 
 def test_factory(file_instance_mock):
@@ -326,19 +326,48 @@ def test_send_file(base_app, s3fs):
     with base_app.test_request_context():
         res = s3fs.send_file(
             'test.txt', mimetype='text/plain', checksum=checksum)
-        assert res.status_code == 302
-        h = res.headers
-        assert 'Location' in h
-        assert h['Content-Type'] == 'text/plain; charset=utf-8'
-        # FIXME: the lenght is modified somewhere somehow
-        # assert h['Content-Length'] == str(size)
-        assert h['Content-MD5'] == checksum[4:]
-        assert h['ETag'] == '"{0}"'.format(checksum)
 
-        res = s3fs.send_file(
-            'myfilename.txt', mimetype='text/plain', checksum='crc32:test')
-        assert res.status_code == 302
-        assert 'Content-MD5' not in dict(res.headers)
+        if config.S3_SEND_FILE_DIRECTLY:
+            assert res.status_code == 200
+            h = res.headers
+            assert h['Content-Type'] == 'text/plain; charset=utf-8'
+            assert h['Content-Length'] == str(size)
+            assert h['Content-MD5'] == checksum[4:]
+            assert h['ETag'] == '"{0}"'.format(checksum)
+
+            # Content-Type: application/octet-stream
+            # ETag: "b234ee4d69f5fce4486a80fdaf4a4263"
+            # Last-Modified: Sat, 23 Jan 2016 06:21:04 GMT
+            # Cache-Control: max-age=43200, public
+            # Expires: Sat, 23 Jan 2016 19:21:04 GMT
+            # Date: Sat, 23 Jan 2016 07:21:04 GMT
+
+            res = s3fs.send_file(
+                'myfilename.txt', mimetype='text/plain', checksum='crc32:test')
+            assert res.status_code == 200
+            assert 'Content-MD5' not in dict(res.headers)
+
+            # Test for absence of Content-Disposition header to make sure that
+            # it's not present when as_attachment=False
+            res = s3fs.send_file('myfilename.txt', mimetype='text/plain',
+                                 checksum=checksum, as_attachment=False)
+            assert res.status_code == 200
+            assert 'attachment' not in res.headers['Content-Disposition']
+
+        else:
+            assert res.status_code == 302
+            h = res.headers
+            assert 'Location' in h
+            assert h['Content-Type'] == 'text/plain; charset=utf-8'
+            # FIXME: the lenght is modified somewhere somehow
+            # assert h['Content-Length'] == str(size)
+            assert h['Content-MD5'] == checksum[4:]
+            assert h['ETag'] == '"{0}"'.format(checksum)
+
+            res = s3fs.send_file(
+                'myfilename.txt', mimetype='text/plain', checksum='crc32:test')
+            assert res.status_code == 302
+            assert 'Content-MD5' not in dict(res.headers)
 
 
 def test_send_file_fail(base_app, s3fs):
