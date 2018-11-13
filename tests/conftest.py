@@ -26,7 +26,6 @@ def app_config(app_config):
     app_config['S3_ENDPOINT_URL'] = ''
     app_config['S3_ACCCESS_KEY_ID'] = ''
     app_config['S3_SECRECT_ACCESS_KEY'] = ''
-    app_config['S3_SEND_FILE_DIRECTLY'] = True
     return app_config
 
 
