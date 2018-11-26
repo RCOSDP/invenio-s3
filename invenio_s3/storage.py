@@ -125,7 +125,7 @@ class S3FSFileStorage(PyFSFileStorage):
                                                           as_attachment=as_attachment)
         try:
             fs, path = self._get_fs()
-            url = fs.url(path, expires=60)
+            url = fs.url(path, expires=60, ResponseContentDisposition="filename='{}'".format(urllib.parse.quote(filename)))
 
             md5_checksum = None
             if checksum:
