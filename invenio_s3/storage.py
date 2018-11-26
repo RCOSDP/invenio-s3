@@ -17,6 +17,7 @@ from invenio_files_rest.storage import PyFSFileStorage, pyfs_storage_factory
 from .config import S3_SEND_FILE_DIRECTLY
 from .helpers import redirect_stream
 
+import urllib.parse
 
 class S3FSFileStorage(PyFSFileStorage):
     """File system storage using Amazon S3 API for accessing files."""
