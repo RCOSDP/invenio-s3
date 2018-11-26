@@ -24,7 +24,7 @@ from invenio_files_rest.storage import PyFSFileStorage
 from mock import patch
 from s3fs import S3File, S3FileSystem
 
-from invenio_s3 import S3FSFileStorage, s3fs_storage_factory, config
+from invenio_s3 import S3FSFileStorage, config, s3fs_storage_factory
 
 
 def test_factory(file_instance_mock):

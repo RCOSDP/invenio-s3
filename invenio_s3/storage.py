@@ -7,6 +7,7 @@
 """S3 file storage interface."""
 from __future__ import absolute_import, print_function
 
+import urllib.parse
 from io import BytesIO
 
 import s3fs
@@ -17,7 +18,6 @@ from invenio_files_rest.storage import PyFSFileStorage, pyfs_storage_factory
 from .config import S3_SEND_FILE_DIRECTLY
 from .helpers import redirect_stream
 
-import urllib.parse
 
 class S3FSFileStorage(PyFSFileStorage):
     """File system storage using Amazon S3 API for accessing files."""
@@ -115,7 +115,6 @@ class S3FSFileStorage(PyFSFileStorage):
     def send_file(self, filename, mimetype=None, restricted=True, checksum=None,
                   trusted=False, chunk_size=None, as_attachment=False):
         """Send the file to the client."""
-
         if S3_SEND_FILE_DIRECTLY:
             return super(S3FSFileStorage, self).send_file(filename,
                                                           mimetype=mimetype,
