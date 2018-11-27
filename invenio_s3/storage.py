@@ -128,7 +128,7 @@ class S3FSFileStorage(PyFSFileStorage):
                 as_attachment=as_attachment)
         try:
             fs, path = self._get_fs()
-            if mimetype == 'application/octet-stream':
+            if mimetype == 'binary/octet-stream':
                 _filename = quote(filename.encode('utf-8'))
                 opt = "attachment; filename=\"" + _filename \
                     + "\"; filename*=UTF-8''" + _filename
