@@ -134,10 +134,7 @@ class S3FSFileStorage(PyFSFileStorage):
                     + "\"; filename*=UTF-8''" + _filename
                 url = fs.url(path, expires=60, ResponseContentDisposition=opt)
             else:
-                _filename = quote(filename.encode('utf-8'))
-                opt = "inline; filename=\"" + _filename \
-                    + "\"; filename*=UTF-8''" + _filename
-                url = fs.url(path, expires=60, ResponseContentDisposition=opt)
+                url = fs.url(path, expires=60)
 
             md5_checksum = None
             if checksum:
