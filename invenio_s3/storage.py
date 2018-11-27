@@ -128,14 +128,10 @@ class S3FSFileStorage(PyFSFileStorage):
                 as_attachment=as_attachment)
         try:
             fs, path = self._get_fs()
-            if mimetype == 'binary/octet-stream':
-                _filename = quote(filename.encode('utf-8'))
-                opt = "attachment; filename=\"" + _filename \
-                    + "\"; filename*=UTF-8''" + _filename
-                url = fs.url(path, expires=60, ResponseContentDisposition=opt)
-            else:
-                url = fs.url(path, expires=60)
-
+            _filename = quote(filename.encode('utf-8'))
+            opt = "attachment; filename=\"" + _filename \
+                + "\"; filename*=UTF-8''" + _filename
+            url = fs.url(path, expires=60, ResponseContentDisposition=opt)
             md5_checksum = None
             if checksum:
                 algo, value = checksum.split(':')
