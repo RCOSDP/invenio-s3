@@ -112,23 +112,26 @@ class S3FSFileStorage(PyFSFileStorage):
 
         return bytes_written, checksum
 
-    def send_file(self, filename, mimetype=None, restricted=True, checksum=None,
-                  trusted=False, chunk_size=None, as_attachment=False):
+    def send_file(self, filename, mimetype=None, restricted=True,
+                  checksum=None, trusted=False, chunk_size=None,
+                  as_attachment=False):
         """Send the file to the client."""
         if S3_SEND_FILE_DIRECTLY:
-            return super(S3FSFileStorage, self).send_file(filename,
-                                                          mimetype=mimetype,
-                                                          restricted=restricted,
-                                                          checksum=checksum,
-                                                          trusted=trusted,
-                                                          chunk_size=chunk_size,
-                                                          as_attachment=as_attachment)
+            return super(S3FSFileStorage, self).send_file(
+                filename,
+                mimetype=mimetype,
+                restricted=restricted,
+                checksum=checksum,
+                trusted=trusted,
+                chunk_size=chunk_size,
+                as_attachment=as_attachment)
         try:
             fs, path = self._get_fs()
             _filename = urllib.parse.quote(filename)
             opt = "attachment; filename=\"{a}\"; "
             "filename*=UTF-8''{b}".format(a=_filename, b=_filename)
             url = fs.url(path, expires=60, ResponseContentDisposition=opt)
+            url = fs.url(path, expires=60)
 
             md5_checksum = None
             if checksum:

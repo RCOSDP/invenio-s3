@@ -39,7 +39,7 @@ See `Configuring Credentials
 for more information.
 """
 
-S3_SEND_FILE_DIRECTLY = True
+S3_SEND_FILE_DIRECTLY = False
 """The flag to use when send file to the client.
 
 If this flag is false, system will redirects the file to the client.

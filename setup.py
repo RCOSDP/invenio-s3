@@ -46,6 +46,7 @@ setup_requires = [
 install_requires = [
     'boto3>=1.7.84', 
     's3fs>=0.1.5',
+    'urllib3>=1.24.1',
     'invenio-files-rest>=1.0.0a23'
 ]
 
