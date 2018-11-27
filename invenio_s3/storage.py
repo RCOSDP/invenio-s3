@@ -7,13 +7,14 @@
 """S3 file storage interface."""
 from __future__ import absolute_import, print_function
 
-import urllib.parse
+import sys
 from io import BytesIO
 
 import s3fs
 from flask import current_app
 from invenio_files_rest.errors import StorageError
 from invenio_files_rest.storage import PyFSFileStorage, pyfs_storage_factory
+from six.moves.urllib.parse import quote
 
 from .config import S3_SEND_FILE_DIRECTLY
 from .helpers import redirect_stream
@@ -127,11 +128,16 @@ class S3FSFileStorage(PyFSFileStorage):
                 as_attachment=as_attachment)
         try:
             fs, path = self._get_fs()
-            _filename = urllib.parse.quote(filename)
-            opt = "attachment; filename=\"{a}\"; "
-            "filename*=UTF-8''{b}".format(a=_filename, b=_filename)
-            url = fs.url(path, expires=60, ResponseContentDisposition=opt)
-            url = fs.url(path, expires=60)
+            if mimetype == 'application/octet-stream':
+                _filename = quote(filename.encode('utf-8'))
+                opt = "attachment; filename=\""+_filename+"\"; "
+                "filename*=UTF-8''"+_filename
+                url = fs.url(path, expires=60, ResponseContentDisposition=opt)
+            else:
+                _filename = quote(filename.encode('utf-8'))
+                opt = "inline; filename=\""+_filename+"\"; "
+                "filename*=UTF-8''"+_filename
+                url = fs.url(path, expires=60, ResponseContentDisposition=opt)
 
             md5_checksum = None
             if checksum:
