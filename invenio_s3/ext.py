@@ -11,6 +11,7 @@ from __future__ import absolute_import, print_function
 import boto3
 from flask import current_app
 from werkzeug.utils import cached_property
+from invenio_files_rest.models import Location
 
 from . import config
 
@@ -31,7 +32,11 @@ class InvenioS3(object):
             secret=current_app.config.get('S3_SECRECT_ACCESS_KEY', ''),
             client_kwargs={},
         )
-
+        default_location = Location.query.filter_by(default=True).first()
+        if default_location.access_key != None:
+            info['key'] = default_location.access_key
+        if default_location.secret_key != None:
+            info['secret'] = default_location.secret_key
         s3_endpoint = current_app.config.get('S3_ENDPOINT_URL', None)
         if s3_endpoint:
             info['client_kwargs']['endpoint_url'] = s3_endpoint
