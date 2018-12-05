@@ -33,9 +33,8 @@ class InvenioS3(object):
             client_kwargs={},
         )
         default_location = Location.query.filter_by(default=True).first()
-        if default_location.access_key != None:
+        if default_location.type == 's3':
             info['key'] = default_location.access_key
-        if default_location.secret_key != None:
             info['secret'] = default_location.secret_key
         s3_endpoint = current_app.config.get('S3_ENDPOINT_URL', None)
         if s3_endpoint:
